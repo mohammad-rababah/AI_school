@@ -2,10 +2,10 @@ module github.com/mohammad-rababah/AI_school/auth
 
 go 1.25.0
 
-require github.com/gin-gonic/gin v1.9.1
-
 require (
+	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
+	github.com/mohammad-rababah/AI_school/common v0.0.0
 )
 
 require (

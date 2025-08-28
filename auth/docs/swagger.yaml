@@ -1,0 +1,446 @@
+basePath: /api/v1
+definitions:
+  request.InitRequest:
+    properties:
+      email:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - phone
+    type: object
+  request.LoginRequest:
+    properties:
+      email_or_phone:
+        type: string
+      password:
+        type: string
+    required:
+    - email_or_phone
+    - password
+    type: object
+  request.PasswordResetConfirmRequest:
+    properties:
+      email_or_phone:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+      otp:
+        type: string
+    required:
+    - email_or_phone
+    - new_password
+    - otp
+    type: object
+  request.PasswordResetRequest:
+    properties:
+      email_or_phone:
+        type: string
+    required:
+    - email_or_phone
+    type: object
+  request.RegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - phone
+    type: object
+  request.TokenRefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  request.VerifyEmailRequest:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  request.VerifyPhoneRequest:
+    properties:
+      otp:
+        type: string
+      phone:
+        type: string
+    required:
+    - otp
+    - phone
+    type: object
+  response.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  response.GenericResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  response.SessionsResponse:
+    properties:
+      sessions:
+        items:
+          type: string
+        type: array
+    type: object
+  response.StatusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for authentication and tutor onboarding
+  title: AI School Auth API
+  version: "1.0"
+paths:
+  /tutor/auth/init:
+    post:
+      consumes:
+      - application/json
+      description: Checks if email/phone are available and creates a preliminary tutor
+        record
+      parameters:
+      - description: Init request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.InitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Initialize tutor registration
+      tags:
+      - tutor
+  /tutor/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates tutor and returns JWT tokens
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Tutor login
+      tags:
+      - tutor
+  /tutor/auth/logout:
+    post:
+      description: Logs out the tutor and invalidates session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Tutor logout
+      tags:
+      - tutor
+  /tutor/auth/password/reset/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Confirms password reset with OTP and new password
+      parameters:
+      - description: Password reset confirm request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.PasswordResetConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Confirm password reset
+      tags:
+      - tutor
+  /tutor/auth/password/reset/request:
+    post:
+      consumes:
+      - application/json
+      description: Requests a password reset for tutor
+      parameters:
+      - description: Password reset request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.PasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Request password reset
+      tags:
+      - tutor
+  /tutor/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new tutor with provided details
+      parameters:
+      - description: Register request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Register tutor
+      tags:
+      - tutor
+  /tutor/auth/sessions:
+    get:
+      description: Returns all active sessions for the tutor
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SessionsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get active sessions
+      tags:
+      - tutor
+  /tutor/auth/sessions/{id}:
+    delete:
+      description: Deletes a specific session by ID
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete session
+      tags:
+      - tutor
+  /tutor/auth/status:
+    get:
+      description: Returns the current status of the tutor
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StatusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get tutor status
+      tags:
+      - tutor
+  /tutor/auth/token/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes access and refresh tokens
+      parameters:
+      - description: Token refresh request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.TokenRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Refresh JWT token
+      tags:
+      - tutor
+  /tutor/auth/verify/email:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the email with OTP
+      parameters:
+      - description: Verify email request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.VerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Verify tutor email
+      tags:
+      - tutor
+  /tutor/auth/verify/phone:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the phone with OTP
+      parameters:
+      - description: Verify phone request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.VerifyPhoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Verify tutor phone
+      tags:
+      - tutor
+swagger: "2.0"

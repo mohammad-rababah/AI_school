@@ -1,12 +1,22 @@
+// @title AI School Auth API
+// @version 1.0
+// @description API for authentication and tutor onboarding
+// @host localhost:8080
+// @BasePath /api/v1
 package main
 
 import (
 	"context"
 	"fmt"
 	"github.com/joho/godotenv"
+	_ "github.com/mohammad-rababah/AI_school/auth/docs"
 	"github.com/mohammad-rababah/AI_school/auth/src/controller"
+	"github.com/mohammad-rababah/AI_school/auth/src/migration"
+	"github.com/mohammad-rababah/AI_school/auth/src/repo"
 	"github.com/mohammad-rababah/AI_school/auth/src/server"
 	"github.com/mohammad-rababah/AI_school/auth/src/service"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +27,16 @@ import (
 
 func StartService() {
 	fmt.Println("auth service running")
+
+	// Initialize DB and run migration
+	db, err := migration.InitDB()
+	if err != nil {
+		log.Fatalf("failed to initialize DB: %v", err)
+	}
+
+	tutorRepo := repo.NewTutorRepo(db)
+	tutorService := service.NewTutorService(tutorRepo)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = ":8080"
@@ -26,11 +46,13 @@ func StartService() {
 
 	srv := server.NewServer(port)
 
+	// Add Swagger UI route
+	srv.Engine().GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// Create base API group
 	api := srv.Engine().Group("/api/v1")
 
-	// Register Tutor APIs under base group
-	tutorService := service.NewTutorService()
+	// Register Tutor APIs under base group using InitTutorAPIs
 	controller.InitTutorAPIs(api, tutorService)
 
 	shutdown := make(chan os.Signal, 1)

@@ -2,7 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
+	"github.com/mohammad-rababah/AI_school/auth/src/model/db"
 	"github.com/mohammad-rababah/AI_school/auth/src/model/request"
+	"github.com/mohammad-rababah/AI_school/auth/src/repo"
+	"github.com/mohammad-rababah/AI_school/auth/src/util"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // TutorService defines public methods for tutor business logic
@@ -23,18 +28,109 @@ type TutorService interface {
 
 // tutorService is the private implementation
 type tutorService struct {
-	// add any dependencies here (e.g. repo, logger)
+	tutorRepo repo.TutorRepo
 }
 
-func (s *tutorService) Init(ctx context.Context, req *request.InitRequest) error { return nil }
+func (s *tutorService) Init(ctx context.Context, req *request.InitRequest) error {
+	emailChan := make(chan repo.ChanResult[bool], 1)
+	phoneChan := make(chan repo.ChanResult[bool], 1)
+	s.tutorRepo.IsEmailExists(ctx, req.Email, emailChan)
+	s.tutorRepo.IsPhoneExists(ctx, req.Phone, phoneChan)
+	emailResult := <-emailChan
+	phoneResult := <-phoneChan
+	close(emailChan)
+	close(phoneChan)
+	if emailResult.Error != nil {
+		return emailResult.Error
+	}
+	if phoneResult.Error != nil {
+		return phoneResult.Error
+	}
+	if emailResult.Data {
+		return errors.New("email already registered")
+	}
+	if phoneResult.Data {
+		return errors.New("phone already registered")
+	}
+	resultChan := make(chan repo.ChanResult[db.Tutor], 1)
+	tutor := db.Tutor{
+		Email:  req.Email,
+		Phone:  req.Phone,
+		Status: db.TutorStatusPending,
+	}
+	s.tutorRepo.CreateTutor(ctx, tutor, resultChan)
+	createResult := <-resultChan
+	close(resultChan)
+	if createResult.Error != nil {
+		return createResult.Error
+	}
+	return nil
+}
 func (s *tutorService) VerifyEmail(ctx context.Context, req *request.VerifyEmailRequest) error {
 	return nil
 }
 func (s *tutorService) VerifyPhone(ctx context.Context, req *request.VerifyPhoneRequest) error {
 	return nil
 }
-func (s *tutorService) Register(ctx context.Context, req *request.RegisterRequest) error { return nil }
-func (s *tutorService) Login(ctx context.Context, req *request.LoginRequest) error       { return nil }
+func (s *tutorService) Register(ctx context.Context, req *request.RegisterRequest) error {
+	emailChan := make(chan repo.ChanResult[bool], 1)
+	phoneChan := make(chan repo.ChanResult[bool], 1)
+	s.tutorRepo.IsEmailExists(ctx, req.Email, emailChan)
+	s.tutorRepo.IsPhoneExists(ctx, req.Phone, phoneChan)
+	emailResult := <-emailChan
+	phoneResult := <-phoneChan
+	close(emailChan)
+	close(phoneChan)
+	if emailResult.Error != nil {
+		return emailResult.Error
+	}
+	if phoneResult.Error != nil {
+		return phoneResult.Error
+	}
+	if emailResult.Data {
+		return errors.New("email already registered")
+	}
+	if phoneResult.Data {
+		return errors.New("phone already registered")
+	}
+	// Hash the password using bcrypt
+	hashedPasswordBytes, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	hashedPassword := string(hashedPasswordBytes)
+	resultChan := make(chan repo.ChanResult[db.Tutor], 1)
+	tutor := db.Tutor{
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		Phone:     req.Phone,
+		Password:  hashedPassword,
+		Status:    db.TutorStatusPending,
+	}
+	s.tutorRepo.CreateTutor(ctx, tutor, resultChan)
+	createResult := <-resultChan
+	close(resultChan)
+	if createResult.Error != nil {
+		return createResult.Error
+	}
+	return nil
+}
+
+func (s *tutorService) Login(ctx context.Context, req *request.LoginRequest) error {
+	resultChan := make(chan repo.ChanResult[*db.Tutor], 1)
+	s.tutorRepo.GetTutorByEmail(ctx, req.EmailOrPhone, resultChan)
+	getResult := <-resultChan
+	close(resultChan)
+	if getResult.Error != nil || getResult.Data == nil {
+		return errors.New("invalid credentials")
+	}
+	if getResult.Data.Password != req.Password {
+		return errors.New("invalid credentials")
+	}
+	_, err := util.GenerateJWT(getResult.Data.ID)
+	return err
+}
 func (s *tutorService) TokenRefresh(ctx context.Context, req *request.TokenRefreshRequest) error {
 	return nil
 }
@@ -54,6 +150,6 @@ func (s *tutorService) PasswordResetConfirm(ctx context.Context, req *request.Pa
 func (s *tutorService) GetStatus(ctx context.Context, userID string) (string, error) { return "", nil }
 
 // NewTutorService returns the public interface
-func NewTutorService() TutorService {
-	return &tutorService{}
+func NewTutorService(tutorRepo repo.TutorRepo) TutorService {
+	return &tutorService{tutorRepo: tutorRepo}
 }

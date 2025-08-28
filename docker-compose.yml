@@ -1,0 +1,33 @@
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: auth/Dockerfile
+    container_name: auth_service
+    ports:
+      - "8081:8080"
+    environment:
+      - DATABASE_URL=postgres://user:password@postgresdb:5432/ai_school?sslmode=disable
+      - JWT_SECRET=your_jwt_secret_here
+    depends_on:
+      - postgresdb
+  onboard:
+    build: ./onboard
+    container_name: onboard_service
+    ports:
+      - "8082:8080"
+  postgresdb:
+    image: postgres:15
+    container_name: postgresdb
+    restart: always
+    environment:
+      POSTGRES_DB: ai_school
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

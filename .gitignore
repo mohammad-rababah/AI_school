@@ -26,9 +26,3 @@ Thumbs.db
 *.log
 *.out
 
-# Docker
-Dockerfile
-entrypoint.sh
-docker-compose.yml
-*.pid
-

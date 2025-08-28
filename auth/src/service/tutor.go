@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"learing_project/auth/src/model/request"
+	"github.com/mohammad-rababah/AI_school/auth/src/model/request"
 )
 
 // TutorService defines public methods for tutor business logic

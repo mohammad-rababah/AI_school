@@ -2,10 +2,10 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"learing_project/auth/src/model/request"
-	"learing_project/auth/src/model/response"
-	"learing_project/auth/src/service"
-	"learing_project/common"
+	"github.com/mohammad-rababah/AI_school/auth/src/model/request"
+	"github.com/mohammad-rababah/AI_school/auth/src/model/response"
+	"github.com/mohammad-rababah/AI_school/auth/src/service"
+	"github.com/mohammad-rababah/AI_school/common"
 	"net/http"
 )
 

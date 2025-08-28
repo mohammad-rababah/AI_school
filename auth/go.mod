@@ -1,10 +1,12 @@
-module learing_project/auth
+module github.com/mohammad-rababah/AI_school/auth
 
-go 1.21
+go 1.25.0
 
 require github.com/gin-gonic/gin v1.9.1
 
-require github.com/joho/godotenv v1.5.1
+require (
+	github.com/joho/godotenv v1.5.1
+)
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect
@@ -32,5 +34,3 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace learing_project/common => ../common

@@ -1,0 +1,34 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output of build tools
+/build/
+/bin/
+
+# Dependency directories
+/vendor/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Go specific
+*.log
+*.out
+
+# Docker
+Dockerfile
+entrypoint.sh
+docker-compose.yml
+*.pid
+

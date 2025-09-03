@@ -1,5 +1,88 @@
 basePath: /api/v1
 definitions:
+  request.FacilityOwnerLoginRequest:
+    properties:
+      email_or_phone:
+        type: string
+      password:
+        type: string
+    required:
+    - email_or_phone
+    - password
+    type: object
+  request.FacilityOwnerOnboardingDocumentsRequest:
+    properties:
+      documents:
+        description: JSON string for docs
+        type: string
+      facility_id:
+        type: integer
+    required:
+    - documents
+    - facility_id
+    type: object
+  request.FacilityOwnerPasswordResetConfirmRequest:
+    properties:
+      email_or_phone:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+      otp:
+        type: string
+    required:
+    - email_or_phone
+    - new_password
+    - otp
+    type: object
+  request.FacilityOwnerPasswordResetRequest:
+    properties:
+      email_or_phone:
+        type: string
+    required:
+    - email_or_phone
+    type: object
+  request.FacilityOwnerRegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - password
+    - phone
+    type: object
+  request.FacilityOwnerTokenRefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  request.FacilityOwnerVerifyEmailRequest:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  request.FacilityOwnerVerifyPhoneRequest:
+    properties:
+      otp:
+        type: string
+      phone:
+        type: string
+    required:
+    - otp
+    - phone
+    type: object
   request.LoginRequest:
     properties:
       email_or_phone:
@@ -139,6 +222,28 @@ definitions:
       error:
         type: string
     type: object
+  response.FacilityOwnerLoginWithProfileResponse:
+    properties:
+      access_token:
+        type: string
+      profile:
+        $ref: '#/definitions/response.FacilityOwnerProfileResponse'
+      refresh_token:
+        type: string
+    type: object
+  response.FacilityOwnerProfileResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+      role:
+        type: string
+      status:
+        type: string
+    type: object
   response.GenericResponse:
     properties:
       message:
@@ -218,6 +323,377 @@ info:
   title: AI School Auth API
   version: "1.0"
 paths:
+  /facility/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates facility owner and returns JWT tokens and profile
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.FacilityOwnerLoginWithProfileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Facility owner login
+      tags:
+      - facility_owner
+  /facility/auth/logout:
+    post:
+      description: Logs out the facility owner and invalidates session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Facility owner logout
+      tags:
+      - facility_owner
+  /facility/auth/onboarding/documents:
+    post:
+      consumes:
+      - application/json
+      description: Submits onboarding documents for a facility
+      parameters:
+      - description: Onboarding documents request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerOnboardingDocumentsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Submit onboarding documents
+      tags:
+      - facility_owner
+  /facility/auth/password/reset/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Confirms password reset with OTP and new password
+      parameters:
+      - description: Password reset confirm request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerPasswordResetConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Confirm password reset
+      tags:
+      - facility_owner
+  /facility/auth/password/reset/request:
+    post:
+      consumes:
+      - application/json
+      description: Requests a password reset for facility owner
+      parameters:
+      - description: Password reset request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerPasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Request password reset
+      tags:
+      - facility_owner
+  /facility/auth/profile:
+    get:
+      description: Returns the current profile of the facility owner
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.FacilityOwnerProfileResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get facility owner profile
+      tags:
+      - facility_owner
+  /facility/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new facility owner
+      parameters:
+      - description: Register request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Register facility owner
+      tags:
+      - facility_owner
+  /facility/auth/sessions:
+    get:
+      description: Returns all active sessions for the facility owner
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SessionsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get active sessions
+      tags:
+      - facility_owner
+  /facility/auth/sessions/{id}:
+    delete:
+      description: Deletes a specific session by ID
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete session
+      tags:
+      - facility_owner
+  /facility/auth/status:
+    get:
+      description: Returns the current status of the facility owner
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StatusResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get facility owner status
+      tags:
+      - facility_owner
+  /facility/auth/token/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes the access and refresh tokens for the facility owner
+      parameters:
+      - description: Token refresh request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerTokenRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Refresh facility owner tokens
+      tags:
+      - facility_owner
+  /facility/auth/verify/email:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the email with OTP
+      parameters:
+      - description: Verify email request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerVerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Verify facility owner email
+      tags:
+      - facility_owner
+  /facility/auth/verify/phone:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the phone with OTP
+      parameters:
+      - description: Verify phone request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.FacilityOwnerVerifyPhoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Verify facility owner phone
+      tags:
+      - facility_owner
   /student/auth/login:
     post:
       consumes:

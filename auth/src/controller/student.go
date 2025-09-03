@@ -9,10 +9,9 @@ import (
 	"net/http"
 )
 
-// TutorController defines public methods for tutor APIs
-type TutorController interface {
-	Verify(c *gin.Context)
+type StudentController interface {
 	Register(c *gin.Context)
+	Verify(c *gin.Context)
 	Login(c *gin.Context)
 	Logout(c *gin.Context)
 	GetSessions(c *gin.Context)
@@ -21,88 +20,88 @@ type TutorController interface {
 	PasswordResetConfirm(c *gin.Context)
 	GetProfile(c *gin.Context)
 	TokenRefresh(c *gin.Context)
+	GetStatus(c *gin.Context)
 }
 
-// tutorController is the private implementation
-type tutorController struct {
-	service service.TutorService
+type studentController struct {
+	service service.StudentService
 }
 
-// Verify godoc
-// @Summary      Verify tutor contact (email or phone)
-// @Description  Verifies the contact with OTP
-// @Tags         tutor
+// Register godoc
+// @Summary      Register student
+// @Description  Registers a new student with provided details
+// @Tags         student
 // @Accept       json
 // @Produce      json
-// @Param        request body request.VerifyRequest true "Verify request"
+// @Param        request body request.StudentRegisterRequest true "Register request"
 // @Success      200 {object} response.GenericResponse
 // @Failure      400 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/verify [post]
-func (t *tutorController) Verify(c *gin.Context) {
-	var req request.VerifyRequest
+// @Router       /student/auth/register [post]
+func (s *studentController) Register(c *gin.Context) {
+	var req request.StudentRegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	if err := t.service.Verify(c.Request.Context(), &req); err != nil {
+	if err := s.service.Register(c.Request.Context(), &req); err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, response.GenericResponse{Message: "student registered"})
+}
+
+// Verify godoc
+// @Summary      Verify student contact (email or phone)
+// @Description  Verifies the contact with OTP
+// @Tags         student
+// @Accept       json
+// @Produce      json
+// @Param        request body request.StudentVerifyRequest true "Verify request"
+// @Success      200 {object} response.GenericResponse
+// @Failure      400 {object} response.ErrorResponse
+// @Failure      500 {object} response.ErrorResponse
+// @Router       /student/auth/verify [post]
+func (s *studentController) Verify(c *gin.Context) {
+	var req request.StudentVerifyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+	if err := s.service.Verify(c.Request.Context(), &req); err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, response.GenericResponse{Message: "verify contact"})
 }
 
-// Register godoc
-// @Summary      Register tutor
-// @Description  Registers a new tutor with provided details
-// @Tags         tutor
-// @Accept       json
-// @Produce      json
-// @Param        request body request.RegisterRequest true "Register request"
-// @Success      200 {object} response.GenericResponse
-// @Failure      400 {object} response.ErrorResponse
-// @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/register [post]
-func (t *tutorController) Register(c *gin.Context) {
-	var req request.RegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
-		return
-	}
-	if err := t.service.Register(c.Request.Context(), &req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, response.GenericResponse{Message: "user registered"})
-}
-
 // Login godoc
-// @Summary      Tutor login
-// @Description  Authenticates tutor and returns JWT tokens and profile
-// @Tags         tutor
+// @Summary      Student login
+// @Description  Authenticates student and returns JWT tokens and profile
+// @Tags         student
 // @Accept       json
 // @Produce      json
-// @Param        request body request.LoginRequest true "Login request"
-// @Success      200 {object} response.TutorLoginWithProfileResponse
+// @Param        request body request.StudentLoginRequest true "Login request"
+// @Success      200 {object} response.StudentLoginWithProfileResponse
 // @Failure      400 {object} response.ErrorResponse
 // @Failure      401 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/login [post]
-func (t *tutorController) Login(c *gin.Context) {
-	var req request.LoginRequest
+// @Router       /student/auth/login [post]
+func (s *studentController) Login(c *gin.Context) {
+	var req request.StudentLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	accessToken, refreshToken, profile, err := t.service.Login(c.Request.Context(), &req)
+	accessToken, refreshToken, profile, err := s.service.Login(c.Request.Context(), &req)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	resp := response.TutorLoginWithProfileResponse{
+	resp := response.StudentLoginWithProfileResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		Profile: response.TutorProfileResponse{
+		Profile: response.StudentProfileResponse{
 			ID:        profile.ID,
 			FirstName: profile.FirstName,
 			LastName:  profile.LastName,
@@ -115,17 +114,17 @@ func (t *tutorController) Login(c *gin.Context) {
 }
 
 // Logout godoc
-// @Summary      Tutor logout
-// @Description  Logs out the tutor and invalidates session
-// @Tags         tutor
+// @Summary      Student logout
+// @Description  Logs out the student and invalidates session
+// @Tags         student
 // @Produce      json
 // @Success      200 {object} response.GenericResponse
 // @Failure      401 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/logout [post]
-func (t *tutorController) Logout(c *gin.Context) {
-	userID := c.GetString("userID") // placeholder, should be extracted from context/session
-	if err := t.service.Logout(c.Request.Context(), userID); err != nil {
+// @Router       /student/auth/logout [post]
+func (s *studentController) Logout(c *gin.Context) {
+	userID := c.GetString("userID")
+	if err := s.service.Logout(c.Request.Context(), userID); err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -134,16 +133,16 @@ func (t *tutorController) Logout(c *gin.Context) {
 
 // GetSessions godoc
 // @Summary      Get active sessions
-// @Description  Returns all active sessions for the tutor
-// @Tags         tutor
+// @Description  Returns all active sessions for the student
+// @Tags         student
 // @Produce      json
 // @Success      200 {object} response.SessionsResponse
 // @Failure      401 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/sessions [get]
-func (t *tutorController) GetSessions(c *gin.Context) {
-	userID := c.GetString("userID") // placeholder
-	sessions, err := t.service.GetSessions(c.Request.Context(), userID)
+// @Router       /student/auth/sessions [get]
+func (s *studentController) GetSessions(c *gin.Context) {
+	userID := c.GetString("userID")
+	sessions, err := s.service.GetSessions(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
@@ -154,21 +153,21 @@ func (t *tutorController) GetSessions(c *gin.Context) {
 // DeleteSession godoc
 // @Summary      Delete session
 // @Description  Deletes a specific session by ID
-// @Tags         tutor
+// @Tags         student
 // @Produce      json
 // @Param        id path string true "Session ID"
 // @Success      200 {object} response.GenericResponse
 // @Failure      400 {object} response.ErrorResponse
 // @Failure      401 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/sessions/{id} [delete]
-func (t *tutorController) DeleteSession(c *gin.Context) {
-	var req request.DeleteSessionRequest
+// @Router       /student/auth/sessions/{id} [delete]
+func (s *studentController) DeleteSession(c *gin.Context) {
+	var req request.StudentDeleteSessionRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	if err := t.service.DeleteSession(c.Request.Context(), &req); err != nil {
+	if err := s.service.DeleteSession(c.Request.Context(), &req); err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -177,22 +176,22 @@ func (t *tutorController) DeleteSession(c *gin.Context) {
 
 // PasswordResetRequest godoc
 // @Summary      Request password reset
-// @Description  Requests a password reset for tutor
-// @Tags         tutor
+// @Description  Requests a password reset for student
+// @Tags         student
 // @Accept       json
 // @Produce      json
-// @Param        request body request.PasswordResetRequest true "Password reset request"
+// @Param        request body request.StudentPasswordResetRequest true "Password reset request"
 // @Success      200 {object} response.GenericResponse
 // @Failure      400 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/password/reset/request [post]
-func (t *tutorController) PasswordResetRequest(c *gin.Context) {
-	var req request.PasswordResetRequest
+// @Router       /student/auth/password/reset/request [post]
+func (s *studentController) PasswordResetRequest(c *gin.Context) {
+	var req request.StudentPasswordResetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	if err := t.service.PasswordResetRequest(c.Request.Context(), &req); err != nil {
+	if err := s.service.PasswordResetRequest(c.Request.Context(), &req); err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -202,21 +201,21 @@ func (t *tutorController) PasswordResetRequest(c *gin.Context) {
 // PasswordResetConfirm godoc
 // @Summary      Confirm password reset
 // @Description  Confirms password reset with OTP and new password
-// @Tags         tutor
+// @Tags         student
 // @Accept       json
 // @Produce      json
-// @Param        request body request.PasswordResetConfirmRequest true "Password reset confirm request"
+// @Param        request body request.StudentPasswordResetConfirmRequest true "Password reset confirm request"
 // @Success      200 {object} response.GenericResponse
 // @Failure      400 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/password/reset/confirm [post]
-func (t *tutorController) PasswordResetConfirm(c *gin.Context) {
-	var req request.PasswordResetConfirmRequest
+// @Router       /student/auth/password/reset/confirm [post]
+func (s *studentController) PasswordResetConfirm(c *gin.Context) {
+	var req request.StudentPasswordResetConfirmRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	if err := t.service.PasswordResetConfirm(c.Request.Context(), &req); err != nil {
+	if err := s.service.PasswordResetConfirm(c.Request.Context(), &req); err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -224,23 +223,23 @@ func (t *tutorController) PasswordResetConfirm(c *gin.Context) {
 }
 
 // GetProfile godoc
-// @Summary      Get tutor profile
-// @Description  Returns the current profile of the tutor
-// @Tags         tutor
+// @Summary      Get student profile
+// @Description  Returns the current profile of the student
+// @Tags         student
 // @Produce      json
-// @Success      200 {object} response.TutorProfileResponse
+// @Success      200 {object} response.StudentProfileResponse
 // @Failure      401 {object} response.ErrorResponse
 // @Failure      404 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/profile [get]
-func (t *tutorController) GetProfile(c *gin.Context) {
-	userID := c.GetString("userID") // placeholder
-	profile, err := t.service.GetProfile(c.Request.Context(), userID)
+// @Router       /student/auth/profile [get]
+func (s *studentController) GetProfile(c *gin.Context) {
+	userID := c.GetString("userID")
+	profile, err := s.service.GetProfile(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
 		return
 	}
-	resp := response.TutorProfileResponse{
+	resp := response.StudentProfileResponse{
 		ID:        profile.ID,
 		FirstName: profile.FirstName,
 		LastName:  profile.LastName,
@@ -252,24 +251,24 @@ func (t *tutorController) GetProfile(c *gin.Context) {
 }
 
 // TokenRefresh godoc
-// @Summary      Refresh tutor tokens
-// @Description  Refreshes the access and refresh tokens for the tutor
-// @Tags         tutor
+// @Summary      Refresh student tokens
+// @Description  Refreshes the access and refresh tokens for the student
+// @Tags         student
 // @Accept       json
 // @Produce      json
-// @Param        request body request.TokenRefreshRequest true "Token refresh request"
+// @Param        request body request.StudentTokenRefreshRequest true "Token refresh request"
 // @Success      200 {object} response.LoginResponse
 // @Failure      400 {object} response.ErrorResponse
 // @Failure      401 {object} response.ErrorResponse
 // @Failure      500 {object} response.ErrorResponse
-// @Router       /tutor/auth/token/refresh [post]
-func (t *tutorController) TokenRefresh(c *gin.Context) {
-	var req request.TokenRefreshRequest
+// @Router       /student/auth/token/refresh [post]
+func (s *studentController) TokenRefresh(c *gin.Context) {
+	var req request.StudentTokenRefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Error: "Missing or invalid refresh token"})
 		return
 	}
-	accessToken, refreshToken, err := t.service.RefreshTokens(req.RefreshToken)
+	accessToken, refreshToken, err := s.service.RefreshTokens(req.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, response.ErrorResponse{Error: err.Error()})
 		return
@@ -280,30 +279,47 @@ func (t *tutorController) TokenRefresh(c *gin.Context) {
 	})
 }
 
-// NewTutorController returns the public interface
-func NewTutorController(s service.TutorService) TutorController {
-	return &tutorController{service: s}
+// GetStatus godoc
+// @Summary      Get student status
+// @Description  Returns the current status of the student
+// @Tags         student
+// @Produce      json
+// @Success      200 {object} response.StatusResponse
+// @Failure      401 {object} response.ErrorResponse
+// @Failure      404 {object} response.ErrorResponse
+// @Failure      500 {object} response.ErrorResponse
+// @Router       /student/auth/status [get]
+func (s *studentController) GetStatus(c *gin.Context) {
+	userID := c.GetString("userID")
+	profile, err := s.service.GetProfile(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, response.StatusResponse{Status: string(profile.Status)})
 }
 
-// InitTutorAPIs registers tutor routes to the Gin router group
-func InitTutorAPIs(rg *gin.RouterGroup, s service.TutorService) {
-	ctrl := NewTutorController(s)
-	// Public endpoints
-	tutor := rg.Group("tutor/auth")
+func NewStudentController(s service.StudentService) StudentController {
+	return &studentController{service: s}
+}
+
+func InitStudentAPIs(rg *gin.RouterGroup, s service.StudentService) {
+	ctrl := NewStudentController(s)
+	student := rg.Group("student/auth")
 	{
-		tutor.POST("/verify", ctrl.Verify)
-		tutor.POST("/register", ctrl.Register)
-		tutor.POST("/login", ctrl.Login)
-		tutor.POST("/password/reset/request", ctrl.PasswordResetRequest)
-		tutor.POST("/token/refresh", ctrl.TokenRefresh)
+		student.POST("/register", ctrl.Register)
+		student.POST("/verify", ctrl.Verify)
+		student.POST("/login", ctrl.Login)
+		student.POST("/password/reset/request", ctrl.PasswordResetRequest)
+		student.POST("/token/refresh", ctrl.TokenRefresh)
 	}
-	// Protected endpoints with JWT middleware
-	tutorAuth := tutor.Group("").Use(middleware.JWTAuthMiddleware())
+	studentAuth := student.Group("").Use(middleware.JWTAuthMiddleware())
 	{
-		tutorAuth.POST("/logout", ctrl.Logout)
-		tutorAuth.GET("/sessions", ctrl.GetSessions)
-		tutorAuth.DELETE("/sessions/:id", ctrl.DeleteSession)
-		tutorAuth.POST("/password/reset/confirm", ctrl.PasswordResetConfirm)
-		tutorAuth.GET("/profile", ctrl.GetProfile)
+		studentAuth.POST("/logout", ctrl.Logout)
+		studentAuth.GET("/sessions", ctrl.GetSessions)
+		studentAuth.DELETE("/sessions/:id", ctrl.DeleteSession)
+		studentAuth.POST("/password/reset/confirm", ctrl.PasswordResetConfirm)
+		studentAuth.GET("/profile", ctrl.GetProfile)
+		studentAuth.GET("/status", ctrl.GetStatus)
 	}
 }

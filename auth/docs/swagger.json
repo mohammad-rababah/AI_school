@@ -9,9 +9,484 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
+        "/student/auth/login": {
+            "post": {
+                "description": "Authenticates student and returns JWT tokens and profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Student login",
+                "parameters": [
+                    {
+                        "description": "Login request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.StudentLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.StudentLoginWithProfileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/logout": {
+            "post": {
+                "description": "Logs out the student and invalidates session",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Student logout",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GenericResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/password/reset/confirm": {
+            "post": {
+                "description": "Confirms password reset with OTP and new password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Confirm password reset",
+                "parameters": [
+                    {
+                        "description": "Password reset confirm request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.StudentPasswordResetConfirmRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/password/reset/request": {
+            "post": {
+                "description": "Requests a password reset for student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Request password reset",
+                "parameters": [
+                    {
+                        "description": "Password reset request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.StudentPasswordResetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/profile": {
+            "get": {
+                "description": "Returns the current profile of the student",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Get student profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.StudentProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/register": {
+            "post": {
+                "description": "Registers a new student with provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Register student",
+                "parameters": [
+                    {
+                        "description": "Register request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.StudentRegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/sessions": {
+            "get": {
+                "description": "Returns all active sessions for the student",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Get active sessions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SessionsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/sessions/{id}": {
+            "delete": {
+                "description": "Deletes a specific session by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Delete session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/status": {
+            "get": {
+                "description": "Returns the current status of the student",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Get student status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.StatusResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/token/refresh": {
+            "post": {
+                "description": "Refreshes the access and refresh tokens for the student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Refresh student tokens",
+                "parameters": [
+                    {
+                        "description": "Token refresh request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.StudentTokenRefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/student/auth/verify": {
+            "post": {
+                "description": "Verifies the contact with OTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "student"
+                ],
+                "summary": "Verify student contact (email or phone)",
+                "parameters": [
+                    {
+                        "description": "Verify request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.StudentVerifyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/tutor/auth/login": {
             "post": {
-                "description": "Authenticates tutor and returns JWT tokens",
+                "description": "Authenticates tutor and returns JWT tokens and profile",
                 "consumes": [
                     "application/json"
                 ],
@@ -37,7 +512,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.LoginResponse"
+                            "$ref": "#/definitions/response.TutorLoginWithProfileResponse"
                         }
                     },
                     "400": {
@@ -199,7 +674,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ProfileResponse"
+                            "$ref": "#/definitions/response.TutorProfileResponse"
                         }
                     },
                     "401": {
@@ -522,6 +997,104 @@
                 }
             }
         },
+        "request.StudentLoginRequest": {
+            "type": "object",
+            "required": [
+                "email_or_phone",
+                "password"
+            ],
+            "properties": {
+                "email_or_phone": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.StudentPasswordResetConfirmRequest": {
+            "type": "object",
+            "required": [
+                "email_or_phone",
+                "new_password",
+                "otp"
+            ],
+            "properties": {
+                "email_or_phone": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "otp": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.StudentPasswordResetRequest": {
+            "type": "object",
+            "required": [
+                "email_or_phone"
+            ],
+            "properties": {
+                "email_or_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.StudentRegisterRequest": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "last_name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.StudentTokenRefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.StudentVerifyRequest": {
+            "type": "object",
+            "required": [
+                "email_or_phone",
+                "otp"
+            ],
+            "properties": {
+                "email_or_phone": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                }
+            }
+        },
         "request.TokenRefreshRequest": {
             "type": "object",
             "required": [
@@ -575,7 +1148,40 @@
                 }
             }
         },
-        "response.ProfileResponse": {
+        "response.SessionsResponse": {
+            "type": "object",
+            "properties": {
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "response.StatusResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.StudentLoginWithProfileResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "profile": {
+                    "$ref": "#/definitions/response.StudentProfileResponse"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.StudentProfileResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -598,14 +1204,40 @@
                 }
             }
         },
-        "response.SessionsResponse": {
+        "response.TutorLoginWithProfileResponse": {
             "type": "object",
             "properties": {
-                "sessions": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "access_token": {
+                    "type": "string"
+                },
+                "profile": {
+                    "$ref": "#/definitions/response.TutorProfileResponse"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.TutorProfileResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         }

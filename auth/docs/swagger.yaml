@@ -51,6 +51,72 @@ definitions:
     - password
     - phone
     type: object
+  request.StudentLoginRequest:
+    properties:
+      email_or_phone:
+        type: string
+      password:
+        type: string
+    required:
+    - email_or_phone
+    - password
+    type: object
+  request.StudentPasswordResetConfirmRequest:
+    properties:
+      email_or_phone:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+      otp:
+        type: string
+    required:
+    - email_or_phone
+    - new_password
+    - otp
+    type: object
+  request.StudentPasswordResetRequest:
+    properties:
+      email_or_phone:
+        type: string
+    required:
+    - email_or_phone
+    type: object
+  request.StudentRegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+    required:
+    - first_name
+    - last_name
+    - password
+    type: object
+  request.StudentTokenRefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  request.StudentVerifyRequest:
+    properties:
+      email_or_phone:
+        type: string
+      otp:
+        type: string
+    required:
+    - email_or_phone
+    - otp
+    type: object
   request.TokenRefreshRequest:
     properties:
       refresh_token:
@@ -85,7 +151,28 @@ definitions:
       refresh_token:
         type: string
     type: object
-  response.ProfileResponse:
+  response.SessionsResponse:
+    properties:
+      sessions:
+        items:
+          type: string
+        type: array
+    type: object
+  response.StatusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  response.StudentLoginWithProfileResponse:
+    properties:
+      access_token:
+        type: string
+      profile:
+        $ref: '#/definitions/response.StudentProfileResponse'
+      refresh_token:
+        type: string
+    type: object
+  response.StudentProfileResponse:
     properties:
       email:
         type: string
@@ -100,12 +187,29 @@ definitions:
       status:
         type: string
     type: object
-  response.SessionsResponse:
+  response.TutorLoginWithProfileResponse:
     properties:
-      sessions:
-        items:
-          type: string
-        type: array
+      access_token:
+        type: string
+      profile:
+        $ref: '#/definitions/response.TutorProfileResponse'
+      refresh_token:
+        type: string
+    type: object
+  response.TutorProfileResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone:
+        type: string
+      status:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -114,11 +218,322 @@ info:
   title: AI School Auth API
   version: "1.0"
 paths:
+  /student/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates student and returns JWT tokens and profile
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StudentLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StudentLoginWithProfileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Student login
+      tags:
+      - student
+  /student/auth/logout:
+    post:
+      description: Logs out the student and invalidates session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Student logout
+      tags:
+      - student
+  /student/auth/password/reset/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Confirms password reset with OTP and new password
+      parameters:
+      - description: Password reset confirm request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StudentPasswordResetConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Confirm password reset
+      tags:
+      - student
+  /student/auth/password/reset/request:
+    post:
+      consumes:
+      - application/json
+      description: Requests a password reset for student
+      parameters:
+      - description: Password reset request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StudentPasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Request password reset
+      tags:
+      - student
+  /student/auth/profile:
+    get:
+      description: Returns the current profile of the student
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StudentProfileResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get student profile
+      tags:
+      - student
+  /student/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new student with provided details
+      parameters:
+      - description: Register request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StudentRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Register student
+      tags:
+      - student
+  /student/auth/sessions:
+    get:
+      description: Returns all active sessions for the student
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SessionsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get active sessions
+      tags:
+      - student
+  /student/auth/sessions/{id}:
+    delete:
+      description: Deletes a specific session by ID
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete session
+      tags:
+      - student
+  /student/auth/status:
+    get:
+      description: Returns the current status of the student
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StatusResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get student status
+      tags:
+      - student
+  /student/auth/token/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes the access and refresh tokens for the student
+      parameters:
+      - description: Token refresh request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StudentTokenRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Refresh student tokens
+      tags:
+      - student
+  /student/auth/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the contact with OTP
+      parameters:
+      - description: Verify request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StudentVerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Verify student contact (email or phone)
+      tags:
+      - student
   /tutor/auth/login:
     post:
       consumes:
       - application/json
-      description: Authenticates tutor and returns JWT tokens
+      description: Authenticates tutor and returns JWT tokens and profile
       parameters:
       - description: Login request
         in: body
@@ -132,7 +547,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.LoginResponse'
+            $ref: '#/definitions/response.TutorLoginWithProfileResponse'
         "400":
           description: Bad Request
           schema:
@@ -238,7 +653,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.ProfileResponse'
+            $ref: '#/definitions/response.TutorProfileResponse'
         "401":
           description: Unauthorized
           schema:

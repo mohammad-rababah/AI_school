@@ -40,6 +40,10 @@ func StartService() {
 	studentRepo := repo.NewStudentRepo(db)
 	studentService := service.NewStudentService(studentRepo)
 
+	facilityOwnerRepo := repo.NewFacilityOwnerRepo(db)
+	facilityRepo := repo.NewFacilityRepo(db)
+	facilityOwnerService := service.NewFacilityOwnerService(facilityOwnerRepo, facilityRepo)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = ":8080"
@@ -58,6 +62,7 @@ func StartService() {
 	// Register Tutor APIs under base group using InitTutorAPIs
 	controller.InitTutorAPIs(api, tutorService)
 	controller.InitStudentAPIs(api, studentService)
+	controller.InitFacilityOwnerAPIs(api, facilityOwnerService)
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)

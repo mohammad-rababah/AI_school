@@ -15,7 +15,8 @@ type TutorRepo interface {
 	GetTutorByEmail(ctx context.Context, email string, result chan<- ChanResult[*db.Tutor])
 	IsEmailExists(ctx context.Context, email string, result chan<- ChanResult[bool])
 	IsPhoneExists(ctx context.Context, phone string, result chan<- ChanResult[bool])
-	// Add more methods as needed
+	GetTutorByPhone(ctx context.Context, phone string, result chan<- ChanResult[*db.Tutor])
+	UpdateTutor(ctx context.Context, tutor db.Tutor, result chan<- ChanResult[db.Tutor])
 }
 
 // tutorRepo is the private implementation
@@ -29,48 +30,53 @@ func NewTutorRepo(db *gorm.DB) TutorRepo {
 }
 
 func (r *tutorRepo) CreateTutor(ctx context.Context, tutor db.Tutor, result chan<- ChanResult[db.Tutor]) {
-	go func() {
-		err := r.db.WithContext(ctx).Create(&tutor).Error
-		result <- ChanResult[db.Tutor]{Data: tutor, Error: err}
-	}()
+	err := r.db.WithContext(ctx).Create(&tutor).Error
+	result <- ChanResult[db.Tutor]{Data: tutor, Error: err}
 }
 
 func (r *tutorRepo) GetTutorByID(ctx context.Context, id uint, result chan<- ChanResult[*db.Tutor]) {
-	go func() {
-		var tutor db.Tutor
-		err := r.db.WithContext(ctx).First(&tutor, id).Error
-		if err != nil {
-			result <- ChanResult[*db.Tutor]{Data: nil, Error: err}
-		} else {
-			result <- ChanResult[*db.Tutor]{Data: &tutor, Error: nil}
-		}
-	}()
+	var tutor db.Tutor
+	err := r.db.WithContext(ctx).First(&tutor, id).Error
+	if err != nil {
+		result <- ChanResult[*db.Tutor]{Data: nil, Error: err}
+	} else {
+		result <- ChanResult[*db.Tutor]{Data: &tutor, Error: nil}
+	}
 }
 
 func (r *tutorRepo) GetTutorByEmail(ctx context.Context, email string, result chan<- ChanResult[*db.Tutor]) {
-	go func() {
-		var tutor db.Tutor
-		err := r.db.WithContext(ctx).Where("email = ?", email).First(&tutor).Error
-		if err != nil {
-			result <- ChanResult[*db.Tutor]{Data: nil, Error: err}
-		} else {
-			result <- ChanResult[*db.Tutor]{Data: &tutor, Error: nil}
-		}
-	}()
+	var tutor db.Tutor
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&tutor).Error
+	if err != nil {
+		result <- ChanResult[*db.Tutor]{Data: nil, Error: err}
+	} else {
+		result <- ChanResult[*db.Tutor]{Data: &tutor, Error: nil}
+	}
 }
 
 func (r *tutorRepo) IsEmailExists(ctx context.Context, email string, result chan<- ChanResult[bool]) {
-	go func() {
-		var count int64
-		err := r.db.WithContext(ctx).Model(&db.Tutor{}).Where("email = ?", email).Count(&count).Error
-		result <- ChanResult[bool]{Data: count > 0, Error: err}
-	}()
+	var count int64
+	err := r.db.WithContext(ctx).Model(&db.Tutor{}).Where("email = ?", email).Count(&count).Error
+	result <- ChanResult[bool]{Data: count > 0, Error: err}
 }
 
 func (r *tutorRepo) IsPhoneExists(ctx context.Context, phone string, result chan<- ChanResult[bool]) {
-	go func() {
-		var count int64
-		err := r.db.WithContext(ctx).Model(&db.Tutor{}).Where("phone = ?", phone).Count(&count).Error
-		result <- ChanResult[bool]{Data: count > 0, Error: err}
-	}()
+	var count int64
+	err := r.db.WithContext(ctx).Model(&db.Tutor{}).Where("phone = ?", phone).Count(&count).Error
+	result <- ChanResult[bool]{Data: count > 0, Error: err}
+}
+
+func (r *tutorRepo) GetTutorByPhone(ctx context.Context, phone string, result chan<- ChanResult[*db.Tutor]) {
+	var tutor db.Tutor
+	err := r.db.WithContext(ctx).Where("phone = ?", phone).First(&tutor).Error
+	if err != nil {
+		result <- ChanResult[*db.Tutor]{Data: nil, Error: err}
+	} else {
+		result <- ChanResult[*db.Tutor]{Data: &tutor, Error: nil}
+	}
+}
+
+func (r *tutorRepo) UpdateTutor(ctx context.Context, tutor db.Tutor, result chan<- ChanResult[db.Tutor]) {
+	err := r.db.WithContext(ctx).Model(&db.Tutor{}).Where("id = ?", tutor.ID).Updates(tutor).Error
+	result <- ChanResult[db.Tutor]{Data: tutor, Error: err}
 }

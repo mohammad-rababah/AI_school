@@ -25,3 +25,21 @@ type SessionsResponse struct {
 type StatusResponse struct {
 	Status string `json:"status"`
 }
+
+// ProfileResponse for tutor profile endpoint
+// Excludes sensitive fields like Password
+type ProfileResponse struct {
+	ID        uint   `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	Status    string `json:"status"`
+}
+
+// LoginWithProfileResponse for successful login with profile
+type LoginWithProfileResponse struct {
+	AccessToken  string          `json:"access_token"`
+	RefreshToken string          `json:"refresh_token"`
+	Profile      ProfileResponse `json:"profile"`
+}

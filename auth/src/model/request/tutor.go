@@ -1,21 +1,11 @@
 package request
 
-// InitRequest for /init endpoint
-type InitRequest struct {
-	Email string `json:"email" binding:"required,email"`
-	Phone string `json:"phone" binding:"required"`
-}
-
-// VerifyEmailRequest for /verify/email endpoint
-type VerifyEmailRequest struct {
-	Email string `json:"email" binding:"required,email"`
-	OTP   string `json:"otp" binding:"required"`
-}
-
-// VerifyPhoneRequest for /verify/phone endpoint
-type VerifyPhoneRequest struct {
-	Phone string `json:"phone" binding:"required"`
-	OTP   string `json:"otp" binding:"required"`
+// VerifyRequest for /verify endpoint
+// Accepts either email or phone
+// Service will determine type
+type VerifyRequest struct {
+	EmailOrPhone string `json:"email_or_phone" binding:"required"`
+	OTP          string `json:"otp" binding:"required"`
 }
 
 // RegisterRequest for /register endpoint

@@ -1,15 +1,5 @@
 basePath: /api/v1
 definitions:
-  request.InitRequest:
-    properties:
-      email:
-        type: string
-      phone:
-        type: string
-    required:
-    - email
-    - phone
-    type: object
   request.LoginRequest:
     properties:
       email_or_phone:
@@ -68,25 +58,15 @@ definitions:
     required:
     - refresh_token
     type: object
-  request.VerifyEmailRequest:
+  request.VerifyRequest:
     properties:
-      email:
+      email_or_phone:
         type: string
       otp:
         type: string
     required:
-    - email
+    - email_or_phone
     - otp
-    type: object
-  request.VerifyPhoneRequest:
-    properties:
-      otp:
-        type: string
-      phone:
-        type: string
-    required:
-    - otp
-    - phone
     type: object
   response.ErrorResponse:
     properties:
@@ -105,17 +85,27 @@ definitions:
       refresh_token:
         type: string
     type: object
+  response.ProfileResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone:
+        type: string
+      status:
+        type: string
+    type: object
   response.SessionsResponse:
     properties:
       sessions:
         items:
           type: string
         type: array
-    type: object
-  response.StatusResponse:
-    properties:
-      status:
-        type: string
     type: object
 host: localhost:8080
 info:
@@ -124,37 +114,6 @@ info:
   title: AI School Auth API
   version: "1.0"
 paths:
-  /tutor/auth/init:
-    post:
-      consumes:
-      - application/json
-      description: Checks if email/phone are available and creates a preliminary tutor
-        record
-      parameters:
-      - description: Init request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/request.InitRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.GenericResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-      summary: Initialize tutor registration
-      tags:
-      - tutor
   /tutor/auth/login:
     post:
       consumes:
@@ -182,6 +141,10 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
       summary: Tutor login
       tags:
       - tutor
@@ -195,6 +158,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.GenericResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -262,6 +229,31 @@ paths:
       summary: Request password reset
       tags:
       - tutor
+  /tutor/auth/profile:
+    get:
+      description: Returns the current profile of the tutor
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ProfileResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get tutor profile
+      tags:
+      - tutor
   /tutor/auth/register:
     post:
       consumes:
@@ -302,6 +294,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.SessionsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -329,6 +325,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -336,28 +336,11 @@ paths:
       summary: Delete session
       tags:
       - tutor
-  /tutor/auth/status:
-    get:
-      description: Returns the current status of the tutor
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.StatusResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-      summary: Get tutor status
-      tags:
-      - tutor
   /tutor/auth/token/refresh:
     post:
       consumes:
       - application/json
-      description: Refreshes access and refresh tokens
+      description: Refreshes the access and refresh tokens for the tutor
       parameters:
       - description: Token refresh request
         in: body
@@ -380,21 +363,25 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.ErrorResponse'
-      summary: Refresh JWT token
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Refresh tutor tokens
       tags:
       - tutor
-  /tutor/auth/verify/email:
+  /tutor/auth/verify:
     post:
       consumes:
       - application/json
-      description: Verifies the email with OTP
+      description: Verifies the contact with OTP
       parameters:
-      - description: Verify email request
+      - description: Verify request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/request.VerifyEmailRequest'
+          $ref: '#/definitions/request.VerifyRequest'
       produces:
       - application/json
       responses:
@@ -410,37 +397,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
-      summary: Verify tutor email
-      tags:
-      - tutor
-  /tutor/auth/verify/phone:
-    post:
-      consumes:
-      - application/json
-      description: Verifies the phone with OTP
-      parameters:
-      - description: Verify phone request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/request.VerifyPhoneRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.GenericResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-      summary: Verify tutor phone
+      summary: Verify tutor contact (email or phone)
       tags:
       - tutor
 swagger: "2.0"

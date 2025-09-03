@@ -15,52 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/tutor/auth/init": {
-            "post": {
-                "description": "Checks if email/phone are available and creates a preliminary tutor record",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tutor"
-                ],
-                "summary": "Initialize tutor registration",
-                "parameters": [
-                    {
-                        "description": "Init request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.InitRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.GenericResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/tutor/auth/login": {
             "post": {
                 "description": "Authenticates tutor and returns JWT tokens",
@@ -103,6 +57,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -122,6 +82,12 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.GenericResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
@@ -225,6 +191,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/tutor/auth/profile": {
+            "get": {
+                "description": "Returns the current profile of the tutor",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "summary": "Get tutor profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/tutor/auth/register": {
             "post": {
                 "description": "Registers a new tutor with provided details",
@@ -288,6 +292,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.SessionsResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -329,30 +339,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/tutor/auth/status": {
-            "get": {
-                "description": "Returns the current status of the tutor",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tutor"
-                ],
-                "summary": "Get tutor status",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.StatusResponse"
                         }
                     },
                     "500": {
@@ -366,7 +356,7 @@ const docTemplate = `{
         },
         "/tutor/auth/token/refresh": {
             "post": {
-                "description": "Refreshes access and refresh tokens",
+                "description": "Refreshes the access and refresh tokens for the tutor",
                 "consumes": [
                     "application/json"
                 ],
@@ -376,7 +366,7 @@ const docTemplate = `{
                 "tags": [
                     "tutor"
                 ],
-                "summary": "Refresh JWT token",
+                "summary": "Refresh tutor tokens",
                 "parameters": [
                     {
                         "description": "Token refresh request",
@@ -406,46 +396,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
-                    }
-                }
-            }
-        },
-        "/tutor/auth/verify/email": {
-            "post": {
-                "description": "Verifies the email with OTP",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tutor"
-                ],
-                "summary": "Verify tutor email",
-                "parameters": [
-                    {
-                        "description": "Verify email request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.VerifyEmailRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.GenericResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -456,9 +406,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/tutor/auth/verify/phone": {
+        "/tutor/auth/verify": {
             "post": {
-                "description": "Verifies the phone with OTP",
+                "description": "Verifies the contact with OTP",
                 "consumes": [
                     "application/json"
                 ],
@@ -468,15 +418,15 @@ const docTemplate = `{
                 "tags": [
                     "tutor"
                 ],
-                "summary": "Verify tutor phone",
+                "summary": "Verify tutor contact (email or phone)",
                 "parameters": [
                     {
-                        "description": "Verify phone request",
+                        "description": "Verify request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.VerifyPhoneRequest"
+                            "$ref": "#/definitions/request.VerifyRequest"
                         }
                     }
                 ],
@@ -504,21 +454,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "request.InitRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "phone"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
         "request.LoginRequest": {
             "type": "object",
             "required": [
@@ -604,32 +539,17 @@ const docTemplate = `{
                 }
             }
         },
-        "request.VerifyEmailRequest": {
+        "request.VerifyRequest": {
             "type": "object",
             "required": [
-                "email",
+                "email_or_phone",
                 "otp"
             ],
             "properties": {
-                "email": {
+                "email_or_phone": {
                     "type": "string"
                 },
                 "otp": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.VerifyPhoneRequest": {
-            "type": "object",
-            "required": [
-                "otp",
-                "phone"
-            ],
-            "properties": {
-                "otp": {
-                    "type": "string"
-                },
-                "phone": {
                     "type": "string"
                 }
             }
@@ -661,6 +581,29 @@ const docTemplate = `{
                 }
             }
         },
+        "response.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "response.SessionsResponse": {
             "type": "object",
             "properties": {
@@ -669,14 +612,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "response.StatusResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string"
                 }
             }
         }

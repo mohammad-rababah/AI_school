@@ -139,18 +139,16 @@ auth/
 **Base URL:** `/api/v1`
 
 ### Tutors (`/tutor/auth`)
-- `POST /init` — start signup  
-- `POST /verify/email`  
-- `POST /verify/phone`  
-- `POST /register` — finalize with password  
-- `POST /login`  
-- `POST /token/refresh`  
-- `POST /logout`  
-- `GET /sessions`  
-- `DELETE /sessions/{id}`  
-- `POST /password/reset/request`  
-- `POST /password/reset/confirm`  
-- `GET /status` (auth/onboarding state)  
+- `POST /register` — register with email, phone, password, name
+- `POST /verify` — verify email or phone with OTP (single endpoint)
+- `POST /login` — login with email or phone
+- `POST /token/refresh` — refresh JWT tokens
+- `POST /logout` — logout and invalidate session
+- `GET /sessions` — list active sessions
+- `DELETE /sessions/{id}` — delete a session
+- `POST /password/reset/request` — request password reset
+- `POST /password/reset/confirm` — confirm password reset with OTP
+- `GET /status` — get tutor status (auth/onboarding state)  
 
 ---
 
